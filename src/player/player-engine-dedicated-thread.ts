@@ -17,10 +17,10 @@
  */
 
 import * as EventEmitter from 'events';
-import * as work from '../utils/webworkify-webpack';
 import type PlayerEngine from './player-engine';
 import Log from '../utils/logger';
 import LoggingControl from '../utils/logging-control.js';
+import {createPlayerEngineWorker} from '../utils/worker-factory.js';
 import { createDefaultConfig } from '../config';
 import MediaInfo from '../core/media-info';
 import MSEEvents from '../core/mse-events';
@@ -117,7 +117,7 @@ class PlayerEngineDedicatedThread implements PlayerEngine {
 
         LoggingControl.registerListener(this.e.onLoggingConfigChanged);
 
-        this._worker = work(require.resolve('./player-engine-worker'), {all: true}) as Worker;
+        this._worker = createPlayerEngineWorker() as Worker;
         this._worker.addEventListener('message', this._onWorkerMessage.bind(this));
 
         this._worker.postMessage({
