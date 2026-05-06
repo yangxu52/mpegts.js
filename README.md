@@ -54,7 +54,7 @@ mpegts.js works by transmuxing MPEG2-TS stream into ISO BMFF (Fragmented MP4) se
 - Extremely low latency of less than 1 second in the best case
 - Playback for `.m2ts` file like BDAV/BDMV with 192 bytes TS packet, or 204 bytes TS packet
 - Support handling dynamic codec parameters change (e.g. video resolution change)
-- Support Chrome, FireFox, Safari, Edge (Old or Chromium) or any Chromium-based browsers
+- Support browsers that satisfy both the ES6 and `ReadableStream` baselines: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+, and equivalent Chromium-based browsers
 - Support chasing latency automatically for internal buffer of HTMLMediaElement
 - Low CPU overhead and low memory usage (JS heap takes about 10MiB for each instance)
 - Support extracting PES private data (stream_type=0x06) like ARIB B24 subtitles (with [aribb24.js][])
@@ -105,7 +105,8 @@ mpegts.js could be tested with [Simple Realtime Server](https://github.com/ossrs
 
 ## Limitations
 - mpeg2video is not supported
-- HTTP MPEG2-TS live stream could not work on old browsers like IE11
+- Legacy browsers such as IE11 and pre-Chromium Edge are not supported
+- Runtime baseline requires both ES6 and `ReadableStream`, with the version matrix taking the higher requirement of the two: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+ ([Can I Use: ES6][caniuse-es6], [Can I Use: ReadableStream][caniuse-readablestream])
 - mpegts.js is not usable on iOS version 17.0 or older caused by the banning of [Media Source Extensions][] (available on iPadOS), iOS 17.1 works through Managed Media Source API
 
 ## Features inherited from flv.js
@@ -113,11 +114,10 @@ mpegts.js could be tested with [Simple Realtime Server](https://github.com/ossrs
 - Multipart segmented video playback
 - HTTP FLV low latency live stream playback
 - FLV over WebSocket live stream playback
-- Compatible with Chrome, FireFox, Safari 10, IE11 and Edge
+- Compatible with browsers on the same ES6 + `ReadableStream` baseline: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+
 - Extremely low overhead, and hardware accelerated by your browser!
 
 ## FLV playback limitations
-- MP3 audio codec is currently not working on IE11 / Edge
 - HTTP FLV live stream is not currently working on all browsers, see [livestream.md](docs/livestream.md)
 
 ## FLV Multipart playback
@@ -154,3 +154,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+[caniuse-es6]: https://caniuse.com/es6
+[caniuse-readablestream]: https://caniuse.com/mdn-api_readablestream_readablestream

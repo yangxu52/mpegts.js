@@ -44,16 +44,15 @@ You must configure `Access-Control-Allow-Origin` header correctly on your stream
 See [cors.md](../docs/cors.md) for details.
 
 ### Compatibility
-Due to IO restrictions, mpegts.js can support HTTP MPEG2-TS/FLV live stream on `Chrome 43+`, `FireFox 42+`, `Edge 15.15048+` and `Safari 10.1+` for now.
+mpegts.js runtime support requires both ES6 and `ReadableStream`, while explicitly excluding pre-Chromium Edge. The public browser matrix takes the higher version requirement of the two baselines: Chrome 52+, Edge 79+, Safari 10.1+, Firefox 65+, Opera 39+ ([Can I Use: ES6][caniuse-es6], [Can I Use: ReadableStream][caniuse-readablestream]).
 
-HTTP MPEG2-TS/FLV live stream relies on stream IO, which has been introduced in [fetch][] and [stream][] spec. Now `FetchStreamLoader` works well on most of the modern browsers:
+- Chrome / Edge (Chromium): `FetchStreamLoader` is used when `fetch` and `ReadableStream` are available
+- FireFox: `FetchStreamLoader` is used on Firefox 65+; the codebase still contains a `moz-chunked-arraybuffer` fallback path as an implementation detail
+- Safari: `FetchStreamLoader` is used on Safari 10.1+
 
-- Chrome: `FetchStreamLoader` works well on Chrome 43+
-- FireFox: FireFox has `fetch` support but `stream` is missing, `moz-chunked-arraybuffer` xhr extension is used
-- Edge: `fetch + stream` is broken on old version of Microsoft Edge, see [Fetch API with ReadableStream has bug with data pumping][]. Got fixed in Creator Update (RS2).
-- Safari: `FetchStreamLoader` works well since Safari 10.1 (macOS 10.12.4)
+Legacy browsers such as IE11 and pre-Chromium Edge are not supported.
 
 [fetch]: https://fetch.spec.whatwg.org/
 [stream]: https://streams.spec.whatwg.org/
-[Fetch API with ReadableStream has bug with data pumping]: https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/8196907/
-[Safari Technology Preview]: https://developer.apple.com/safari/technology-preview/
+[caniuse-es6]: https://caniuse.com/es6
+[caniuse-readablestream]: https://caniuse.com/mdn-api_readablestream_readablestream

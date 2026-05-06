@@ -50,7 +50,7 @@ class SeekingHandler {
         let chrome_need_idr_fix = (Browser.chrome &&
                                   (Browser.version.major < 50 ||
                                   (Browser.version.major === 50 && Browser.version.build < 2661)));
-        this._always_seek_keyframe = (chrome_need_idr_fix || Browser.msedge || Browser.msie) ? true : false;
+        this._always_seek_keyframe = chrome_need_idr_fix;
         if (this._always_seek_keyframe) {
             this._config.accurateSeek = false;
         }

@@ -291,7 +291,7 @@ class PlayerEngineMainThread implements PlayerEngine {
 
         // Reset currentTime to 0
         if (this._media_element.readyState > 0) {
-            // IE11 may throw InvalidStateError if readyState === 0
+            // Avoid direct seek before metadata is available.
             this._seeking_handler.directSeek(0);
         }
 

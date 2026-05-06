@@ -51,7 +51,7 @@ mpegts.js は、JavaScript で MPEG2-TS ストリームを解析しながら、�
 - 最良の場合は 1 秒以内の低遅延が達成可能
 - TS packet が 192 bytes の `.m2ts` ファイル（BDAV/BDMV）、または 204 bytes も再生可能
 - 動的パラメータ切り替えが可能 （例えば、映像解像度が途中に切り替わっても再生します）
-- Chrome, FireFox, Safari, Edge (Old or Chromium) または Chromium-based ブラウザで実行可能
+- ES6 と `ReadableStream` の両方の基線を満たすブラウザで実行可能: Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+、および同等の Chromium-based ブラウザ
 - HTMLMediaElement 内部バッファーの遅延を追いかける機能
 - 低い CPU 使用率とメモリ使用量 （1つのインスタンスが概ね 10MiB のメモリかかります）
 - ARIB-B24 字幕等の PES private data (stream_type=0x06) が抽出可能 （[aribb24.js][] と共同運用可能）
@@ -100,7 +100,8 @@ pnpm build
 
 ## Limitations
 - mpeg2video はサポートしていません。映像は H.264 であることが求められます
-- IE11 などの古いブラウザでは、HTTP MPEG2-TS がライブ視聴できません
+- IE11 や旧 Edge などの旧ランタイムブラウザはサポート対象外です
+- ランタイム基線は ES6 と `ReadableStream` の両方を要求し、バージョン行列はその大きい方に合わせます: Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+（[Can I Use: ES6][caniuse-es6]、[Can I Use: ReadableStream][caniuse-readablestream]）
 - iOS 17.1+ では Apple の ManagedMediaSource API により利用可能です。iOS 17.0 以前は引き続き非対応です
 
 ## Features inherited from flv.js
@@ -108,11 +109,10 @@ pnpm build
 - マルチパットな複数の FLV ファイルも一緒に再生可能
 - HTTP FLV のライブストリームが低遅延で再生可能
 - WebSocket で伝送する FLV ストリームも再生可能
-- Chrome, FireFox, Safari 10, IE11 and Edge のブラウザで実行可能
+- 同じ ES6 + `ReadableStream` 基線を満たすブラウザで実行可能: Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+
 - ブラウザによる hardware accelerated があるためコストは非常に低い
 
 ## FLV playback limitations
-- MP3 audio codec は IE11 / Edge でサポートされていません
 - HTTP FLV のライブストリームは一部のブラウザで再生できません。[livestream.md](docs/livestream.md) を参照
 
 ## FLV Multipart playback
@@ -149,3 +149,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+[caniuse-es6]: https://caniuse.com/es6
+[caniuse-readablestream]: https://caniuse.com/mdn-api_readablestream_readablestream

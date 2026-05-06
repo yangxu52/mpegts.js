@@ -57,9 +57,7 @@ class MP4Remuxer {
                               (Browser.version.major < 50 ||
                               (Browser.version.major === 50 && Browser.version.build < 2661))) ? true : false;
 
-        // Workaround for IE11/Edge: Fill silent aac frame after keyframe-seeking
-        // Make audio beginDts equals with video beginDts, in order to fix seek freeze
-        this._fillSilentAfterSeek = (Browser.msedge || Browser.msie);
+        this._fillSilentAfterSeek = false;
 
         // While only FireFox supports 'audio/mp4, codecs="mp3"', use 'audio/mpeg' for chrome, safari, ...
         this._mp3UseMpegAudio = !Browser.firefox;

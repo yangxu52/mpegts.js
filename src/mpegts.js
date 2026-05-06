@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import Polyfill from './utils/polyfill.js';
 import Features from './core/features.js';
 import {BaseLoader, LoaderStatus, LoaderErrors} from './io/loader.js';
 import MSEPlayer from './player/mse-player';
@@ -27,10 +26,6 @@ import LoggingControl from './utils/logging-control.js';
 import {InvalidArgumentException} from './utils/exception.js';
 
 // here are all the interfaces
-
-// install polyfills
-Polyfill.install();
-
 
 // factory method
 function createPlayer(mediaDataSource, optionalConfig) {

@@ -99,8 +99,7 @@ class NativePlayer {
                 mediaElement.currentTime = this._pendingSeekTime;
                 this._pendingSeekTime = null;
             } catch (e) {
-                // IE11 may throw InvalidStateError if readyState === 0
-                // Defer set currentTime operation after loadedmetadata
+                // Defer currentTime update until metadata is available.
             }
         }
     }

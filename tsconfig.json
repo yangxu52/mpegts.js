@@ -2,13 +2,13 @@
   "compilerOptions": {
     "allowJs": true,
     "sourceMap": true,
-    "module": "es6",
+    "module": "ES2015",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "ES2015",
     "experimentalDecorators": true,
     "noEmit": true,
     "types": ["node"],
-    "lib": ["dom", "es5", "es2015.promise", "es2015.collection", "ESNext", "WebWorker"]
+    "lib": ["ES2015", "DOM", "WebWorker"]
   },
   "include": ["./src/**/*"]
 }

@@ -53,7 +53,7 @@ mpegts.js 通过在 JavaScript 中渐进化解析 MPEG2-TS 流并实时转封装
 - 超低延迟，最佳情况延迟可低达 1 秒以内
 - 回放 TS packet 为 192 字节的 `.m2ts` 文件（BDAV/BDMV）或 204 字节的 TS 流
 - 支持动态编码参数切换，如视频分辨率动态变化
-- 支持 Chrome, FireFox, Safari, Edge (Old or Chromium) 或任何基于 Chromium 的浏览器
+- 支持同时满足 ES6 与 `ReadableStream` 基线的浏览器：Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+，以及其他等效的 Chromium 系浏览器
 - 支持对 HTMLMediaElement 内部缓冲的自动延迟追赶
 - 极低的 CPU 使用率和内存使用量（单个实例约使用 JS 堆 10MiB）
 - 支持 PES private data 回调 (stream_type=0x06)，如 ARIB B24 字幕 （可配合 [aribb24.js][]）
@@ -104,7 +104,8 @@ pnpm build
 
 ## Limitations
 - 不支持 mpeg2video
-- IE11 等旧浏览器不支持 HTTP MPEG2-TS/FLV 直播流回放
+- 不支持 IE11、旧版 Edge 等旧运行时浏览器
+- 运行时基线要求同时满足 ES6 与 `ReadableStream`，版本矩阵按两者中的较大值取整：Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+（[Can I Use: ES6][caniuse-es6]、[Can I Use: ReadableStream][caniuse-readablestream]）
 - iOS 17.1+ 可通过 Apple 的 ManagedMediaSource API 使用；iOS 17.0 及更早版本仍不可用
 
 ## Features inherited from flv.js
@@ -112,11 +113,10 @@ pnpm build
 - 多分段 FLV 视频无缝播放
 - HTTP FLV 低延迟直播流回放
 - FLV over WebSocket 直播流回放
-- 兼容 Chrome, FireFox, Safari 10, IE11, Edge
+- 兼容同一 ES6 + `ReadableStream` 基线的浏览器：Chrome 52+、Edge 79+、Safari 10.1+、FireFox 65+、Opera 39+
 - 超低开销并且由你的浏览器硬件加速
 
 ## FLV playback limitations
-- MP3 编码在 IE11 和旧版 Edge 上不受支持
 - HTTP FLV 直播不支持部分旧浏览器，参阅 [livestream.md](docs/livestream.md)
 
 ## FLV Multipart playback
@@ -153,3 +153,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+[caniuse-es6]: https://caniuse.com/es6
+[caniuse-readablestream]: https://caniuse.com/mdn-api_readablestream_readablestream

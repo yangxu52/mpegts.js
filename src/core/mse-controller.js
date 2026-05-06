@@ -327,8 +327,8 @@ class MSEController {
                 this._doRemoveRanges();
             }
 
-            // Safari 10 may get InvalidStateError in the later appendBuffer() after SourceBuffer.remove() call
-            // Internal parser's state may be invalid at this time. Re-append last InitSegment to workaround.
+            // Some Safari builds may reject later appendBuffer() after SourceBuffer.remove().
+            // Re-append the last init segment to recover the internal parser state.
             // Related issue: https://bugs.webkit.org/show_bug.cgi?id=159230
             if (Browser.safari) {
                 let lastInitSegment = this._lastInitSegments[type];

@@ -23,16 +23,13 @@ function detect() {
 
     let ua = self.navigator.userAgent.toLowerCase();
 
-    let match = /(edge)\/([\w.]+)/.exec(ua) ||
+    let match = /(edg)\/([\w.]+)/.exec(ua) ||
         /(opr)[\/]([\w.]+)/.exec(ua) ||
         /(chrome)[ \/]([\w.]+)/.exec(ua) ||
-        /(iemobile)[\/]([\w.]+)/.exec(ua) ||
         /(version)(applewebkit)[ \/]([\w.]+).*(safari)[ \/]([\w.]+)/.exec(ua) ||
         /(webkit)[ \/]([\w.]+).*(version)[ \/]([\w.]+).*(safari)[ \/]([\w.]+)/.exec(ua) ||
         /(webkit)[ \/]([\w.]+)/.exec(ua) ||
         /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
-        /(msie) ([\w.]+)/.exec(ua) ||
-        ua.indexOf('trident') >= 0 && /(rv)(?::| )([\w.]+)/.exec(ua) ||
         ua.indexOf('compatible') < 0 && /(firefox)[ \/]([\w.]+)/.exec(ua) ||
         [];
 
@@ -80,19 +77,9 @@ function detect() {
         browser.webkit = true;
     }
 
-    // MSIE. IE11 has 'rv' identifer
-    if (browser.rv || browser.iemobile) {
-        if (browser.rv) {
-            delete browser.rv;
-        }
-        let msie = 'msie';
-        matched.browser = msie;
-        browser[msie] = true;
-    }
-
-    // Microsoft Edge
-    if (browser.edge) {
-        delete browser.edge;
+    // Chromium-based Microsoft Edge
+    if (browser.edg) {
+        delete browser.edg;
         let msedge = 'msedge';
         matched.browser = msedge;
         browser[msedge] = true;
