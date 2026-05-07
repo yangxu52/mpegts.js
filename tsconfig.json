@@ -2,13 +2,14 @@
   "compilerOptions": {
     "allowJs": true,
     "sourceMap": true,
-    "module": "ES2015",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "target": "ES2015",
     "experimentalDecorators": true,
     "noEmit": true,
+    "skipLibCheck": true,
     "types": ["node"],
     "lib": ["ES2015", "DOM", "WebWorker"]
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*", "tsdown.config.ts"]
 }

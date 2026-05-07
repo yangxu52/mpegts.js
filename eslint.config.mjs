@@ -40,22 +40,16 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/index.js', 'src/utils/polyfill.js', 'src/utils/webworkify-webpack.js'],
-    languageOptions: {
-      sourceType: 'commonjs',
-    },
-  },
-  {
-    files: ['webpack.config.js'],
+    files: ['tsdown.config.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },
     },
     rules: {
-      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
     },
   }
 )

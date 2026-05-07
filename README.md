@@ -1,6 +1,6 @@
-mpegts.js  [![npm](https://img.shields.io/npm/v/mpegts.js.svg?style=flat)](https://www.npmjs.com/package/mpegts.js)
-======
-[日本語](README_ja.md)  [中文说明](README_zh.md)
+# mpegts.js [![npm](https://img.shields.io/npm/v/mpegts.js.svg?style=flat)](https://www.npmjs.com/package/mpegts.js)
+
+[日本語](README_ja.md) [中文说明](README_zh.md)
 
 HTML5 MPEG2-TS stream player written in TypeScript & JavaScript.
 
@@ -9,52 +9,57 @@ mpegts.js is optimized for low-latency live stream playback, such as DVB/ISDB te
 This project is based on [flv.js](https://github.com/bilibili/flv.js).
 
 ## Overview
+
 mpegts.js works by transmuxing MPEG2-TS stream into ISO BMFF (Fragmented MP4) segments, followed by feeding mp4 segments into an HTML5 `<video>` element through [Media Source Extensions][] API.
 
 [Media Source Extensions]: https://w3c.github.io/media-source/
 
 ## News
+
 - **v1.8.0**
 
-    Support working on **iOS Safari** with iOS 17.1+ through Apple's [ManagedMediaSource API](https://github.com/w3c/media-source/issues/320)
+  Support working on **iOS Safari** with iOS 17.1+ through Apple's [ManagedMediaSource API](https://github.com/w3c/media-source/issues/320)
 
-    Great performance improvements by supporting [MSE in Workers](https://github.com/w3c/media-source/issues/175) on Chrome, Safari 18 (includes iOS)
+  Great performance improvements by supporting [MSE in Workers](https://github.com/w3c/media-source/issues/175) on Chrome, Safari 18 (includes iOS)
 
-    Introduced support for [AV1 over MPEG-TS](https://aomediacodec.github.io/av1-mpeg2-ts/)
+  Introduced support for [AV1 over MPEG-TS](https://aomediacodec.github.io/av1-mpeg2-ts/)
 
-    Introduced support for AV1 over HTTP-FLV defined in [Enhanced RTMP](https://github.com/veovera/enhanced-rtmp)
+  Introduced support for AV1 over HTTP-FLV defined in [Enhanced RTMP](https://github.com/veovera/enhanced-rtmp)
 
-    Support chasing live latency more smoothly by changing playback rate
+  Support chasing live latency more smoothly by changing playback rate
 
-    Introduced ATSC EAC-3 audio codec in MPEG-TS
+  Introduced ATSC EAC-3 audio codec in MPEG-TS
 
-    Support Opus and FLAC audio codec over HTTP-FLV (Enhanced RTMP)
+  Support Opus and FLAC audio codec over HTTP-FLV (Enhanced RTMP)
 
 - **v1.7.3**
 
-    Introduced [Enhanced RTMP] with HEVC support for FLV.
+  Introduced [Enhanced RTMP] with HEVC support for FLV.
 
-    Introduced Opus and ATSC AC-3 audio codec support for MPEG-TS.
+  Introduced Opus and ATSC AC-3 audio codec support for MPEG-TS.
 
-    Introduced LOAS AAC support for MPEG-TS.
+  Introduced LOAS AAC support for MPEG-TS.
 
 - **v1.7.0**
 
-    Introduced H.265/HEVC over MPEG-TS/FLV support.
+  Introduced H.265/HEVC over MPEG-TS/FLV support.
 
 [Enhanced RTMP]: https://github.com/veovera/enhanced-rtmp
+
 ## Demo
+
 [http://xqq.github.io/mpegts.js/demo/](http://xqq.github.io/mpegts.js/demo/)
 
 [demo with aribb24.js](http://xqq.github.io/mpegts.js/demo/arib.html)
 
 ## Features
+
 - Playback for MPEG2-TS stream with H.264/H.265 + AAC codec transported in http(s) or WebSocket
 - Playback for FLV stream with H.264/H.265 + AAC codec transported in http(s) or WebSocket
 - Extremely low latency of less than 1 second in the best case
 - Playback for `.m2ts` file like BDAV/BDMV with 192 bytes TS packet, or 204 bytes TS packet
 - Support handling dynamic codec parameters change (e.g. video resolution change)
-- Support browsers that satisfy both the ES6 and `ReadableStream` baselines: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+, and equivalent Chromium-based browsers
+- Support browsers that satisfy both the ES6 and `ReadableStream` baselines, taking the higher version requirement of the two: Chrome 65+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 52+, and equivalent Chromium-based browsers
 - Support chasing latency automatically for internal buffer of HTMLMediaElement
 - Low CPU overhead and low memory usage (JS heap takes about 10MiB for each instance)
 - Support extracting PES private data (stream_type=0x06) like ARIB B24 subtitles (with [aribb24.js][])
@@ -63,16 +68,19 @@ mpegts.js works by transmuxing MPEG2-TS stream into ISO BMFF (Fragmented MP4) se
 [aribb24.js]: https://github.com/monyone/aribb24.js
 
 ## CORS
+
 If you use standalone video server for MPEG2-TS stream, `Access-Control-Allow-Origin` header must be configured correctly on video server for cross-origin resource fetching.
 
 See [cors.md](docs/cors.md) for more details.
 
 ## Installation
+
 ```bash
 npm install --save mpegts.js
 ```
 
 ## Build
+
 ```bash
 pnpm install
 pnpm build
@@ -81,64 +89,77 @@ pnpm build
 [cnpm](https://github.com/cnpm/cnpm) mirror is recommended if you are in Mainland China.
 
 ## Getting Started
+
 ```html
-<script src="mpegts.js"></script>
+<script src="mpegts.global.js"></script>
 <video id="videoElement"></video>
 <script>
-    if (mpegts.getFeatureList().mseLivePlayback) {
-        var videoElement = document.getElementById('videoElement');
-        var player = mpegts.createPlayer({
-            type: 'mse',  // could also be mpegts, m2ts, flv
-            isLive: true,
-            url: 'http://example.com/live/livestream.ts'
-        });
-        player.attachMediaElement(videoElement);
-        player.load();
-        player.play();
-    }
+  if (mpegts.getFeatureList().mseLivePlayback) {
+    var videoElement = document.getElementById('videoElement')
+    var player = mpegts.createPlayer({
+      type: 'mse', // could also be mpegts, m2ts, flv
+      isLive: true,
+      url: 'http://example.com/live/livestream.ts',
+    })
+    player.attachMediaElement(videoElement)
+    player.load()
+    player.play()
+  }
 </script>
 ```
+
+When using the global build, deploy `mpegts.global.js`, `transmuxing-worker.js`, and `player-engine-worker.js` together under the same directory.
 mpegts.js could be tested with [Simple Realtime Server](https://github.com/ossrs/srs/).
 
 ## TODO
+
 - MPEG2-TS static file playback (seeking is not supported now)
 
 ## Limitations
+
 - mpeg2video is not supported
 - Legacy browsers such as IE11 and pre-Chromium Edge are not supported
-- Runtime baseline requires both ES6 and `ReadableStream`, with the version matrix taking the higher requirement of the two: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+ ([Can I Use: ES6][caniuse-es6], [Can I Use: ReadableStream][caniuse-readablestream])
+- Runtime baseline requires both ES6 and `ReadableStream`, with the version matrix taking the higher requirement of the two: Chrome 65+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 52+ ([Can I Use: ES6][caniuse-es6], [Can I Use: ReadableStream][caniuse-readablestream])
 - mpegts.js is not usable on iOS version 17.0 or older caused by the banning of [Media Source Extensions][] (available on iPadOS), iOS 17.1 works through Managed Media Source API
 
 ## Features inherited from flv.js
+
 - FLV container with H.264 + AAC / MP3 codec playback
 - Multipart segmented video playback
 - HTTP FLV low latency live stream playback
 - FLV over WebSocket live stream playback
-- Compatible with browsers on the same ES6 + `ReadableStream` baseline: Chrome 52+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 39+
+- Compatible with browsers on the same ES6 + `ReadableStream` baseline: Chrome 65+, Edge 79+, Safari 10.1+, FireFox 65+, Opera 52+
 - Extremely low overhead, and hardware accelerated by your browser!
 
 ## FLV playback limitations
+
 - HTTP FLV live stream is not currently working on all browsers, see [livestream.md](docs/livestream.md)
 
 ## FLV Multipart playback
+
 You only have to provide a playlist for `MediaDataSource`. See [multipart.md](docs/multipart.md)
 
 ## Livestream playback
+
 See [livestream.md](docs/livestream.md)
 
 ## API and Configuration
+
 See [api.md](docs/api.md)
 
 ## Debug
+
 ```bash
 pnpm install
 pnpm build:debug
 ```
 
 ## Design
+
 See [design.md](docs/design.md)
 
 ## License
+
 ```
 Copyright (C) 2021 magicxqq. All Rights Reserved.
 

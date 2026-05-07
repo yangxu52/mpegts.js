@@ -1,12 +1,20 @@
-import work from './webworkify-webpack'
+const TRANSMUXING_WORKER_PATH = './transmuxing-worker.js'
+const PLAYER_ENGINE_WORKER_PATH = './player-engine-worker.js'
+const WORKER_BASE_URL = __WORKER_BASE_URL__
+const WORKER_FALLBACK_BASE_URL = __WORKER_FALLBACK_BASE_URL__
 
-const transmuxingWorkerModuleId = require.resolve('../core/transmuxing-worker')
-const playerEngineWorkerModuleId = require.resolve('../player/player-engine-worker')
+function resolveWorkerBaseUrl() {
+  return WORKER_BASE_URL || WORKER_FALLBACK_BASE_URL
+}
+
+function createWorker(workerPath) {
+  return new Worker(new URL(workerPath, resolveWorkerBaseUrl()))
+}
 
 export function createTransmuxingWorker() {
-  return work(transmuxingWorkerModuleId)
+  return createWorker(TRANSMUXING_WORKER_PATH)
 }
 
 export function createPlayerEngineWorker() {
-  return work(playerEngineWorkerModuleId, { all: true })
+  return createWorker(PLAYER_ENGINE_WORKER_PATH)
 }
