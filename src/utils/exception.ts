@@ -17,57 +17,51 @@
  */
 
 export class RuntimeException {
+  protected _message: string
 
-    constructor(message) {
-        this._message = message;
-    }
+  constructor(message: string) {
+    this._message = message
+  }
 
-    get name() {
-        return 'RuntimeException';
-    }
+  get name(): string {
+    return 'RuntimeException'
+  }
 
-    get message() {
-        return this._message;
-    }
+  get message(): string {
+    return this._message
+  }
 
-    toString() {
-        return this.name + ': ' + this.message;
-    }
-
+  toString(): string {
+    return this.name + ': ' + this.message
+  }
 }
 
 export class IllegalStateException extends RuntimeException {
+  constructor(message: string) {
+    super(message)
+  }
 
-    constructor(message) {
-        super(message);
-    }
-
-    get name() {
-        return 'IllegalStateException';
-    }
-
+  get name(): string {
+    return 'IllegalStateException'
+  }
 }
 
 export class InvalidArgumentException extends RuntimeException {
+  constructor(message: string) {
+    super(message)
+  }
 
-    constructor(message) {
-        super(message);
-    }
-
-    get name() {
-        return 'InvalidArgumentException';
-    }
-
+  get name(): string {
+    return 'InvalidArgumentException'
+  }
 }
 
 export class NotImplementedException extends RuntimeException {
+  constructor(message: string) {
+    super(message)
+  }
 
-    constructor(message) {
-        super(message);
-    }
-
-    get name() {
-        return 'NotImplementedException';
-    }
-
+  get name(): string {
+    return 'NotImplementedException'
+  }
 }
