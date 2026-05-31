@@ -25,61 +25,7 @@ import type { LoggingControlConfig } from '../utils/logging-control.js'
 import TransmuxingController from './transmuxing-controller.js'
 import TransmuxingEvents from './transmuxing-events'
 import MediaInfo from './media-info.js'
-
-type WorkerCommand =
-  | { cmd: 'init'; param: [any, Config] }
-  | { cmd: 'logging_config'; param: LoggingControlConfig }
-  | { cmd: 'destroy' | 'start' | 'stop' | 'pause' | 'resume' }
-  | { cmd: 'seek'; param: number }
-
-type WorkerMediaMessage = {
-  msg: TransmuxingEvents.INIT_SEGMENT | TransmuxingEvents.MEDIA_SEGMENT
-  data: {
-    type: string
-    data: any
-  }
-}
-
-type WorkerErrorMessage = {
-  msg: TransmuxingEvents.IO_ERROR | TransmuxingEvents.DEMUX_ERROR
-  data: {
-    type: any
-    info: any
-  }
-}
-
-type WorkerInfoMessage = {
-  msg:
-    | TransmuxingEvents.MEDIA_INFO
-    | TransmuxingEvents.METADATA_ARRIVED
-    | TransmuxingEvents.SCRIPTDATA_ARRIVED
-    | TransmuxingEvents.TIMED_ID3_METADATA_ARRIVED
-    | TransmuxingEvents.PGS_SUBTITLE_ARRIVED
-    | TransmuxingEvents.SYNCHRONOUS_KLV_METADATA_ARRIVED
-    | TransmuxingEvents.ASYNCHRONOUS_KLV_METADATA_ARRIVED
-    | TransmuxingEvents.SMPTE2038_METADATA_ARRIVED
-    | TransmuxingEvents.SCTE35_METADATA_ARRIVED
-    | TransmuxingEvents.SEI_ARRIVED
-    | TransmuxingEvents.PES_PRIVATE_DATA_DESCRIPTOR
-    | TransmuxingEvents.PES_PRIVATE_DATA_ARRIVED
-    | TransmuxingEvents.STATISTICS_INFO
-    | TransmuxingEvents.RECOMMEND_SEEKPOINT
-  data: any
-}
-
-type WorkerSimpleMessage = {
-  msg: TransmuxingEvents.LOADING_COMPLETE | TransmuxingEvents.RECOVERED_EARLY_EOF | 'destroyed'
-}
-
-type WorkerLogcatMessage = {
-  msg: 'logcat_callback'
-  data: {
-    type: string
-    logcat: string
-  }
-}
-
-type WorkerMessage = WorkerMediaMessage | WorkerErrorMessage | WorkerInfoMessage | WorkerSimpleMessage | WorkerLogcatMessage
+import type { TransmuxingWorkerCommand, TransmuxingWorkerMessage } from './transmuxing-worker-types'
 
 type LoggingListenerMap = {
   onLoggingConfigChanged: (config: LoggingControlConfig) => void
@@ -105,12 +51,12 @@ class Transmuxer {
         this._worker = createTransmuxingWorker()
         this._workerDestroying = false
         this._worker.addEventListener('message', this._onWorkerMessage.bind(this))
-        this._worker.postMessage({ cmd: 'init', param: [mediaDataSource, config] } as WorkerCommand)
+        this._worker.postMessage({ cmd: 'init', param: [mediaDataSource, config] } as TransmuxingWorkerCommand)
         this.e = {
           onLoggingConfigChanged: this._onLoggingConfigChanged.bind(this),
         }
         LoggingControl.registerListener(this.e.onLoggingConfigChanged)
-        this._worker.postMessage({ cmd: 'logging_config', param: LoggingControl.getConfig() } as WorkerCommand)
+        this._worker.postMessage({ cmd: 'logging_config', param: LoggingControl.getConfig() } as TransmuxingWorkerCommand)
       } catch (_error) {
         Log.e(this.TAG, 'Error while initialize transmuxing worker, fallback to inline transmuxing')
         this._worker = null
@@ -148,7 +94,7 @@ class Transmuxer {
     if (this._worker) {
       if (!this._workerDestroying) {
         this._workerDestroying = true
-        this._worker.postMessage({ cmd: 'destroy' } as WorkerCommand)
+        this._worker.postMessage({ cmd: 'destroy' } as TransmuxingWorkerCommand)
         if (this.e) {
           LoggingControl.removeListener(this.e.onLoggingConfigChanged)
           this.e = null
@@ -175,7 +121,7 @@ class Transmuxer {
 
   open(): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'start' } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'start' } as TransmuxingWorkerCommand)
     } else {
       this._controller?.start()
     }
@@ -183,7 +129,7 @@ class Transmuxer {
 
   close(): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'stop' } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'stop' } as TransmuxingWorkerCommand)
     } else {
       this._controller?.stop()
     }
@@ -191,7 +137,7 @@ class Transmuxer {
 
   seek(milliseconds: number): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'seek', param: milliseconds } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'seek', param: milliseconds } as TransmuxingWorkerCommand)
     } else {
       this._controller?.seek(milliseconds)
     }
@@ -199,7 +145,7 @@ class Transmuxer {
 
   pause(): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'pause' } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'pause' } as TransmuxingWorkerCommand)
     } else {
       this._controller?.pause()
     }
@@ -207,7 +153,7 @@ class Transmuxer {
 
   resume(): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'resume' } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'resume' } as TransmuxingWorkerCommand)
     } else {
       this._controller?.resume()
     }
@@ -335,11 +281,11 @@ class Transmuxer {
 
   _onLoggingConfigChanged(config: LoggingControlConfig): void {
     if (this._worker) {
-      this._worker.postMessage({ cmd: 'logging_config', param: config } as WorkerCommand)
+      this._worker.postMessage({ cmd: 'logging_config', param: config } as TransmuxingWorkerCommand)
     }
   }
 
-  _onWorkerMessage(e: MessageEvent<WorkerMessage>): void {
+  _onWorkerMessage(e: MessageEvent<TransmuxingWorkerMessage>): void {
     let message = e.data
 
     if (message.msg === 'destroyed' || this._workerDestroying) {

@@ -83,7 +83,7 @@ export default defineConfig([
     ...sharedBuildOptions,
     clean: false,
     entry: {
-      'transmuxing-worker': './src/core/transmuxing-worker-entry.js',
+      'transmuxing-worker': './src/core/transmuxing-worker-entry.ts',
     },
     format: ['iife'],
     globalName: 'mpegtsTransmuxingWorker',
