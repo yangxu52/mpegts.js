@@ -19,7 +19,7 @@
 import Features from './core/features'
 import { BaseLoader, LoaderStatus, LoaderErrors } from './io/loader'
 import MSEPlayer from './player/mse-player'
-import NativePlayer from './player/native-player.js'
+import NativePlayer from './player/native-player'
 import PlayerEvents from './player/player-events'
 import { ErrorTypes, ErrorDetails } from './player/player-errors.js'
 import LoggingControl from './utils/logging-control.js'
