@@ -16,75 +16,73 @@
  * limitations under the License.
  */
 
-import Features from './core/features.js';
-import {BaseLoader, LoaderStatus, LoaderErrors} from './io/loader.js';
-import MSEPlayer from './player/mse-player';
-import NativePlayer from './player/native-player.js';
-import PlayerEvents from './player/player-events';
-import {ErrorTypes, ErrorDetails} from './player/player-errors.js';
-import LoggingControl from './utils/logging-control.js';
-import {InvalidArgumentException} from './utils/exception.js';
+import Features from './core/features'
+import { BaseLoader, LoaderStatus, LoaderErrors } from './io/loader'
+import MSEPlayer from './player/mse-player'
+import NativePlayer from './player/native-player.js'
+import PlayerEvents from './player/player-events'
+import { ErrorTypes, ErrorDetails } from './player/player-errors.js'
+import LoggingControl from './utils/logging-control.js'
+import { InvalidArgumentException } from './utils/exception.js'
 
 // here are all the interfaces
 
 // factory method
 function createPlayer(mediaDataSource, optionalConfig) {
-    let mds = mediaDataSource;
-    if (mds == null || typeof mds !== 'object') {
-        throw new InvalidArgumentException('MediaDataSource must be an javascript object!');
-    }
+  let mds = mediaDataSource
+  if (mds == null || typeof mds !== 'object') {
+    throw new InvalidArgumentException('MediaDataSource must be an javascript object!')
+  }
 
-    if (!mds.hasOwnProperty('type')) {
-        throw new InvalidArgumentException('MediaDataSource must has type field to indicate video file type!');
-    }
+  if (!mds.hasOwnProperty('type')) {
+    throw new InvalidArgumentException('MediaDataSource must has type field to indicate video file type!')
+  }
 
-    switch (mds.type) {
-        case 'mse':
-        case 'mpegts':
-        case 'm2ts':
-        case 'flv':
-            return new MSEPlayer(mds, optionalConfig);
-        default:
-            return new NativePlayer(mds, optionalConfig);
-    }
+  switch (mds.type) {
+    case 'mse':
+    case 'mpegts':
+    case 'm2ts':
+    case 'flv':
+      return new MSEPlayer(mds, optionalConfig)
+    default:
+      return new NativePlayer(mds, optionalConfig)
+  }
 }
-
 
 // feature detection
 function isSupported() {
-    return Features.supportMSEH264Playback();
+  return Features.supportMSEH264Playback()
 }
 
 function getFeatureList() {
-    return Features.getFeatureList();
+  return Features.getFeatureList()
 }
 
-
 // interfaces
-let mpegts = {};
+let mpegts = {}
 
-mpegts.createPlayer = createPlayer;
-mpegts.isSupported = isSupported;
-mpegts.getFeatureList = getFeatureList;
+mpegts.createPlayer = createPlayer
+mpegts.isSupported = isSupported
+mpegts.getFeatureList = getFeatureList
 
-mpegts.BaseLoader = BaseLoader;
-mpegts.LoaderStatus = LoaderStatus;
-mpegts.LoaderErrors = LoaderErrors;
+mpegts.BaseLoader = BaseLoader
+mpegts.LoaderStatus = LoaderStatus
+mpegts.LoaderErrors = LoaderErrors
 
-mpegts.Events = PlayerEvents;
-mpegts.ErrorTypes = ErrorTypes;
-mpegts.ErrorDetails = ErrorDetails;
+mpegts.Events = PlayerEvents
+mpegts.ErrorTypes = ErrorTypes
+mpegts.ErrorDetails = ErrorDetails
 
-mpegts.MSEPlayer = MSEPlayer;
-mpegts.NativePlayer = NativePlayer;
-mpegts.LoggingControl = LoggingControl;
+mpegts.MSEPlayer = MSEPlayer
+mpegts.NativePlayer = NativePlayer
+mpegts.LoggingControl = LoggingControl
 
 Object.defineProperty(mpegts, 'version', {
-    enumerable: true,
-    get: function () {
-        // replaced by webpack.DefinePlugin
-        return __VERSION__;
-    }
-});
+  enumerable: true,
+  get: function () {
+    // replaced by webpack.DefinePlugin
+    return __VERSION__
+  },
+})
 
-export default mpegts;
+export default mpegts
