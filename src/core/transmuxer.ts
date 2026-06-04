@@ -18,7 +18,7 @@
 
 import EventEmitter from 'events'
 import type { Config } from '../config'
-import { createTransmuxingWorker } from '../utils/worker-factory.js'
+import { createTransmuxingWorker } from '../utils/worker-factory'
 import Log from '../utils/logger.js'
 import LoggingControl from '../utils/logging-control.js'
 import type { LoggingControlConfig } from '../utils/logging-control.js'
