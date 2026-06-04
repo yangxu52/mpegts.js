@@ -16,18 +16,65 @@
  * limitations under the License.
  */
 
+import type { Config } from '../config'
+import { MediaSegmentInfo, MediaSegmentInfoList, SampleInfo } from '../core/media-segment-info.js'
 import Log from '../utils/logger.js'
 import MP4 from './mp4-generator.js'
 import AAC from './aac-silent.js'
 import Browser from '../utils/browser.js'
-import { SampleInfo, MediaSegmentInfo, MediaSegmentInfoList } from '../core/media-segment-info.js'
 import { IllegalStateException } from '../utils/exception.js'
+
+export type SegmentType = 'audio' | 'video'
+
+export type InitSegment = {
+  type: SegmentType
+  data: ArrayBuffer
+  codec: string
+  container: string
+  mediaDuration: number
+}
+
+export type MediaSegment = {
+  type: SegmentType
+  data: ArrayBufferLike
+  sampleCount: number
+  info: MediaSegmentInfo
+  timestampOffset?: number
+}
+
+type OnInitSegment = ((type: SegmentType, initSegment: InitSegment) => void) | null
+type OnMediaSegment = ((type: SegmentType, mediaSegment: MediaSegment) => void) | null
+
+type RemuxerProducer = {
+  onDataAvailable: ((audioTrack: any, videoTrack: any) => void) | null
+  onTrackMetadata: ((type: SegmentType, metadata: any) => void) | null
+}
 
 // Fragmented mp4 remuxer
 class MP4Remuxer {
-  constructor(config) {
-    this.TAG = 'MP4Remuxer'
+  private readonly TAG: string = 'MP4Remuxer'
+  private _config: Config
+  private _isLive: boolean
+  private _dtsBase: number
+  private _dtsBaseInited: boolean
+  private _audioDtsBase: number
+  private _videoDtsBase: number
+  private _audioNextDts: number | undefined
+  private _videoNextDts: number | undefined
+  private _audioStashedLastSample: any | null
+  private _videoStashedLastSample: any | null
+  private _audioMeta: any
+  private _videoMeta: any
+  private _audioSegmentInfoList: MediaSegmentInfoList | null
+  private _videoSegmentInfoList: MediaSegmentInfoList | null
+  private _onInitSegment: OnInitSegment
+  private _onMediaSegment: OnMediaSegment
+  private _forceFirstIDR: boolean
+  private _fillSilentAfterSeek: boolean
+  private _mp3UseMpegAudio: boolean
+  private _fillAudioTimestampGap: boolean
 
+  constructor(config: Config) {
     this._config = config
     this._isLive = config.isLive === true ? true : false
 
@@ -61,7 +108,7 @@ class MP4Remuxer {
     this._fillAudioTimestampGap = this._config.fixAudioTimestampGap
   }
 
-  destroy() {
+  destroy(): void {
     this._dtsBase = -1
     this._dtsBaseInited = false
     this._audioMeta = null
@@ -74,7 +121,7 @@ class MP4Remuxer {
     this._onMediaSegment = null
   }
 
-  bindDataSource(producer) {
+  bindDataSource(producer: RemuxerProducer): MP4Remuxer {
     producer.onDataAvailable = this.remux.bind(this)
     producer.onTrackMetadata = this._onTrackMetadataReceived.bind(this)
     return this
@@ -88,11 +135,11 @@ class MP4Remuxer {
            container: string
        }
     */
-  get onInitSegment() {
+  get onInitSegment(): OnInitSegment {
     return this._onInitSegment
   }
 
-  set onInitSegment(callback) {
+  set onInitSegment(callback: OnInitSegment) {
     this._onInitSegment = callback
   }
 
@@ -104,26 +151,26 @@ class MP4Remuxer {
            info: MediaSegmentInfo
        }
     */
-  get onMediaSegment() {
+  get onMediaSegment(): OnMediaSegment {
     return this._onMediaSegment
   }
 
-  set onMediaSegment(callback) {
+  set onMediaSegment(callback: OnMediaSegment) {
     this._onMediaSegment = callback
   }
 
-  insertDiscontinuity() {
+  insertDiscontinuity(): void {
     this._audioNextDts = this._videoNextDts = undefined
   }
 
-  seek(originalDts) {
+  seek(_originalDts?: number): void {
     this._audioStashedLastSample = null
     this._videoStashedLastSample = null
-    this._videoSegmentInfoList.clear()
-    this._audioSegmentInfoList.clear()
+    this._videoSegmentInfoList!.clear()
+    this._audioSegmentInfoList!.clear()
   }
 
-  remux(audioTrack, videoTrack) {
+  remux(audioTrack: any, videoTrack: any): void {
     if (!this._onMediaSegment) {
       throw new IllegalStateException('MP4Remuxer: onMediaSegment callback must be specificed!')
     }
@@ -138,7 +185,7 @@ class MP4Remuxer {
     }
   }
 
-  _onTrackMetadataReceived(type, metadata) {
+  _onTrackMetadataReceived(type: SegmentType, metadata: any): void {
     let metabox = null
 
     let container = 'mp4'
@@ -175,7 +222,7 @@ class MP4Remuxer {
     })
   }
 
-  _calculateDtsBase(audioTrack, videoTrack) {
+  _calculateDtsBase(audioTrack: any, videoTrack: any): void {
     if (this._dtsBaseInited) {
       return
     }
@@ -191,14 +238,14 @@ class MP4Remuxer {
     this._dtsBaseInited = true
   }
 
-  getTimestampBase() {
+  getTimestampBase(): number | undefined {
     if (!this._dtsBaseInited) {
       return undefined
     }
     return this._dtsBase
   }
 
-  flushStashedSamples() {
+  flushStashedSamples(): void {
     let videoSample = this._videoStashedLastSample
     let audioSample = this._audioStashedLastSample
 
@@ -235,7 +282,7 @@ class MP4Remuxer {
     this._remuxAudio(audioTrack, true)
   }
 
-  _remuxAudio(audioTrack, force) {
+  _remuxAudio(audioTrack: any, force?: boolean): void {
     if (this._audioMeta == null) {
       return
     }
@@ -305,15 +352,15 @@ class MP4Remuxer {
       dtsCorrection = firstSampleOriginalDts - this._audioNextDts
     } else {
       // this._audioNextDts == undefined
-      if (this._audioSegmentInfoList.isEmpty()) {
+      if (this._audioSegmentInfoList!.isEmpty()) {
         dtsCorrection = 0
-        if (this._fillSilentAfterSeek && !this._videoSegmentInfoList.isEmpty()) {
+        if (this._fillSilentAfterSeek && !this._videoSegmentInfoList!.isEmpty()) {
           if (this._audioMeta.originalCodec !== 'mp3') {
             insertPrefixSilentFrame = true
           }
         }
       } else {
-        let lastSample = this._audioSegmentInfoList.getLastSampleBefore(firstSampleOriginalDts)
+        let lastSample = this._audioSegmentInfoList!.getLastSampleBefore(firstSampleOriginalDts)
         if (lastSample != null) {
           let distance = firstSampleOriginalDts - (lastSample.originalDts + lastSample.duration)
           if (distance <= 3) {
@@ -331,14 +378,14 @@ class MP4Remuxer {
     if (insertPrefixSilentFrame) {
       // align audio segment beginDts to match with current video segment's beginDts
       let firstSampleDts = firstSampleOriginalDts - dtsCorrection
-      let videoSegment = this._videoSegmentInfoList.getLastSegmentBefore(firstSampleOriginalDts)
+      let videoSegment = this._videoSegmentInfoList!.getLastSegmentBefore(firstSampleOriginalDts)
       if (videoSegment != null && videoSegment.beginDts < firstSampleDts) {
         let silentUnit = AAC.getSilentFrame(this._audioMeta.originalCodec, this._audioMeta.channelCount)
         if (silentUnit) {
           let dts = videoSegment.beginDts
           let silentFrameDuration = firstSampleDts - videoSegment.beginDts
           Log.v(this.TAG, `InsertPrefixSilentAudio: dts: ${dts}, duration: ${silentFrameDuration}`)
-          samples.unshift({ unit: silentUnit, dts: dts, pts: dts })
+          samples.unshift({ unit: silentUnit, dts: dts, pts: dts, length: silentUnit.byteLength })
           mdatBytes += silentUnit.byteLength
         } // silentUnit == null: Cannot generate, skip
       } else {
@@ -479,7 +526,7 @@ class MP4Remuxer {
 
       if (needFillSilentFrames) {
         // Silent frames should be inserted after wrong-duration frame
-        mp4Samples.push.apply(mp4Samples, silentFrames)
+        mp4Samples.push(...silentFrames)
       }
     }
 
@@ -528,7 +575,7 @@ class MP4Remuxer {
     info.firstSample = new SampleInfo(mp4Samples[0].dts, mp4Samples[0].pts, mp4Samples[0].duration, mp4Samples[0].originalDts, false)
     info.lastSample = new SampleInfo(latest.dts, latest.pts, latest.duration, latest.originalDts, false)
     if (!this._isLive) {
-      this._audioSegmentInfoList.append(info)
+      this._audioSegmentInfoList!.append(info)
     }
 
     track.samples = mp4Samples
@@ -547,7 +594,7 @@ class MP4Remuxer {
     track.samples = []
     track.length = 0
 
-    let segment = {
+    let segment: MediaSegment = {
       type: 'audio',
       data: this._mergeBoxes(moofbox, mdatbox).buffer,
       sampleCount: mp4Samples.length,
@@ -560,10 +607,10 @@ class MP4Remuxer {
       segment.timestampOffset = firstDts
     }
 
-    this._onMediaSegment('audio', segment)
+    this._onMediaSegment!('audio', segment)
   }
 
-  _remuxVideo(videoTrack, force) {
+  _remuxVideo(videoTrack: any, force?: boolean): void {
     if (this._videoMeta == null) {
       return
     }
@@ -617,10 +664,10 @@ class MP4Remuxer {
       dtsCorrection = firstSampleOriginalDts - this._videoNextDts
     } else {
       // this._videoNextDts == undefined
-      if (this._videoSegmentInfoList.isEmpty()) {
+      if (this._videoSegmentInfoList!.isEmpty()) {
         dtsCorrection = 0
       } else {
-        let lastSample = this._videoSegmentInfoList.getLastSampleBefore(firstSampleOriginalDts)
+        let lastSample = this._videoSegmentInfoList!.getLastSampleBefore(firstSampleOriginalDts)
         if (lastSample != null) {
           let distance = firstSampleOriginalDts - (lastSample.originalDts + lastSample.duration)
           if (distance <= 3) {
@@ -731,7 +778,7 @@ class MP4Remuxer {
     info.firstSample = new SampleInfo(mp4Samples[0].dts, mp4Samples[0].pts, mp4Samples[0].duration, mp4Samples[0].originalDts, mp4Samples[0].isKeyframe)
     info.lastSample = new SampleInfo(latest.dts, latest.pts, latest.duration, latest.originalDts, latest.isKeyframe)
     if (!this._isLive) {
-      this._videoSegmentInfoList.append(info)
+      this._videoSegmentInfoList!.append(info)
     }
 
     track.samples = mp4Samples
@@ -749,7 +796,7 @@ class MP4Remuxer {
     track.samples = []
     track.length = 0
 
-    this._onMediaSegment('video', {
+    this._onMediaSegment!('video', {
       type: 'video',
       data: this._mergeBoxes(moofbox, mdatbox).buffer,
       sampleCount: mp4Samples.length,
@@ -757,7 +804,7 @@ class MP4Remuxer {
     })
   }
 
-  _mergeBoxes(moof, mdat) {
+  _mergeBoxes(moof: Uint8Array, mdat: Uint8Array): Uint8Array {
     let result = new Uint8Array(moof.byteLength + mdat.byteLength)
     result.set(moof, 0)
     result.set(mdat, moof.byteLength)
