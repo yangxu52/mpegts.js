@@ -26,7 +26,7 @@ export default defineConfig([
     ...sharedBuildOptions,
     clean: true,
     entry: {
-      mpegts: './src/mpegts.js',
+      mpegts: './src/mpegts.ts',
     },
     format: {
       esm: {},

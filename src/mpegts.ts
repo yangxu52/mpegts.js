@@ -18,6 +18,8 @@
 
 import Features from './core/features'
 import { BaseLoader, LoaderStatus, LoaderErrors } from './io/loader'
+import type { Config } from './config'
+import type { DataSource } from './io/loader'
 import MSEPlayer from './player/mse-player'
 import NativePlayer from './player/native-player'
 import PlayerEvents from './player/player-events'
@@ -25,10 +27,29 @@ import { ErrorTypes, ErrorDetails } from './player/player-errors.js'
 import LoggingControl from './utils/logging-control.js'
 import { InvalidArgumentException } from './utils/exception.js'
 
+declare const __VERSION__: string
+
+type PlayerInstance = MSEPlayer | NativePlayer
+
+type MpegtsExports = {
+  createPlayer: (mediaDataSource: DataSource, optionalConfig?: Config) => PlayerInstance
+  isSupported: () => boolean
+  getFeatureList: () => ReturnType<typeof Features.getFeatureList>
+  BaseLoader: typeof BaseLoader
+  LoaderStatus: typeof LoaderStatus
+  LoaderErrors: typeof LoaderErrors
+  Events: typeof PlayerEvents
+  ErrorTypes: typeof ErrorTypes
+  ErrorDetails: typeof ErrorDetails
+  MSEPlayer: typeof MSEPlayer
+  NativePlayer: typeof NativePlayer
+  LoggingControl: typeof LoggingControl
+}
+
 // here are all the interfaces
 
 // factory method
-function createPlayer(mediaDataSource, optionalConfig) {
+function createPlayer(mediaDataSource: DataSource, optionalConfig?: Config): PlayerInstance {
   let mds = mediaDataSource
   if (mds == null || typeof mds !== 'object') {
     throw new InvalidArgumentException('MediaDataSource must be an javascript object!')
@@ -38,7 +59,7 @@ function createPlayer(mediaDataSource, optionalConfig) {
     throw new InvalidArgumentException('MediaDataSource must has type field to indicate video file type!')
   }
 
-  switch (mds.type) {
+  switch (mds.type as string) {
     case 'mse':
     case 'mpegts':
     case 'm2ts':
@@ -50,36 +71,33 @@ function createPlayer(mediaDataSource, optionalConfig) {
 }
 
 // feature detection
-function isSupported() {
+function isSupported(): boolean {
   return Features.supportMSEH264Playback()
 }
 
-function getFeatureList() {
+function getFeatureList(): ReturnType<typeof Features.getFeatureList> {
   return Features.getFeatureList()
 }
 
 // interfaces
-let mpegts = {}
-
-mpegts.createPlayer = createPlayer
-mpegts.isSupported = isSupported
-mpegts.getFeatureList = getFeatureList
-
-mpegts.BaseLoader = BaseLoader
-mpegts.LoaderStatus = LoaderStatus
-mpegts.LoaderErrors = LoaderErrors
-
-mpegts.Events = PlayerEvents
-mpegts.ErrorTypes = ErrorTypes
-mpegts.ErrorDetails = ErrorDetails
-
-mpegts.MSEPlayer = MSEPlayer
-mpegts.NativePlayer = NativePlayer
-mpegts.LoggingControl = LoggingControl
+let mpegts: MpegtsExports = {
+  createPlayer,
+  isSupported,
+  getFeatureList,
+  BaseLoader,
+  LoaderStatus,
+  LoaderErrors,
+  Events: PlayerEvents,
+  ErrorTypes,
+  ErrorDetails,
+  MSEPlayer,
+  NativePlayer,
+  LoggingControl,
+}
 
 Object.defineProperty(mpegts, 'version', {
   enumerable: true,
-  get: function () {
+  get: function (): string {
     // replaced by webpack.DefinePlugin
     return __VERSION__
   },
