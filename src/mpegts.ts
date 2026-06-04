@@ -18,38 +18,22 @@
 
 import Features from './core/features'
 import { BaseLoader, LoaderStatus, LoaderErrors } from './io/loader'
-import type { Config } from './config'
-import type { DataSource } from './io/loader'
 import MSEPlayer from './player/mse-player'
 import NativePlayer from './player/native-player'
 import PlayerEvents from './player/player-events'
 import { ErrorTypes, ErrorDetails } from './player/player-errors.js'
 import LoggingControl from './utils/logging-control.js'
+import type { Config, FeatureList, MediaDataSource, MpegtsExports } from './types'
 import { InvalidArgumentException } from './utils/exception.js'
 
 declare const __VERSION__: string
 
 type PlayerInstance = MSEPlayer | NativePlayer
 
-type MpegtsExports = {
-  createPlayer: (mediaDataSource: DataSource, optionalConfig?: Config) => PlayerInstance
-  isSupported: () => boolean
-  getFeatureList: () => ReturnType<typeof Features.getFeatureList>
-  BaseLoader: typeof BaseLoader
-  LoaderStatus: typeof LoaderStatus
-  LoaderErrors: typeof LoaderErrors
-  Events: typeof PlayerEvents
-  ErrorTypes: typeof ErrorTypes
-  ErrorDetails: typeof ErrorDetails
-  MSEPlayer: typeof MSEPlayer
-  NativePlayer: typeof NativePlayer
-  LoggingControl: typeof LoggingControl
-}
-
 // here are all the interfaces
 
 // factory method
-function createPlayer(mediaDataSource: DataSource, optionalConfig?: Config): PlayerInstance {
+function createPlayer(mediaDataSource: MediaDataSource, optionalConfig?: Config): PlayerInstance {
   let mds = mediaDataSource
   if (mds == null || typeof mds !== 'object') {
     throw new InvalidArgumentException('MediaDataSource must be an javascript object!')
@@ -75,12 +59,12 @@ function isSupported(): boolean {
   return Features.supportMSEH264Playback()
 }
 
-function getFeatureList(): ReturnType<typeof Features.getFeatureList> {
+function getFeatureList(): FeatureList {
   return Features.getFeatureList()
 }
 
 // interfaces
-let mpegts: MpegtsExports = {
+let mpegts: Omit<MpegtsExports, 'version'> = {
   createPlayer,
   isSupported,
   getFeatureList,
@@ -103,4 +87,4 @@ Object.defineProperty(mpegts, 'version', {
   },
 })
 
-export default mpegts
+export default mpegts as MpegtsExports

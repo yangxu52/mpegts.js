@@ -110,6 +110,15 @@ class LoggingControl {
     LoggingControl._notifyChange()
   }
 
+  static get enableCallback(): boolean {
+    return Log.ENABLE_CALLBACK
+  }
+
+  static set enableCallback(enable: boolean) {
+    Log.ENABLE_CALLBACK = enable
+    LoggingControl._notifyChange()
+  }
+
   static getConfig(): LoggingControlConfig {
     return {
       globalTag: Log.GLOBAL_TAG,
