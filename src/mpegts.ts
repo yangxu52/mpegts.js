@@ -64,7 +64,7 @@ function getFeatureList(): FeatureList {
 }
 
 // interfaces
-let mpegts: Omit<MpegtsExports, 'version'> = {
+const mpegts: Omit<MpegtsExports, 'version'> = {
   createPlayer,
   isSupported,
   getFeatureList,
@@ -82,9 +82,9 @@ let mpegts: Omit<MpegtsExports, 'version'> = {
 Object.defineProperty(mpegts, 'version', {
   enumerable: true,
   get: function (): string {
-    // replaced by webpack.DefinePlugin
     return __VERSION__
   },
 })
 
 export default mpegts as MpegtsExports
+export type * from './types'

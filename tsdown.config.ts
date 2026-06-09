@@ -11,7 +11,7 @@ const browserGlobalBase = [
 
 const sharedBuildOptions = {
   clean: true,
-  dts: false,
+  dts: true,
   outDir: 'dist',
   platform: 'browser' as const,
   sourcemap: true,

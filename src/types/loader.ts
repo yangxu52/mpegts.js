@@ -34,20 +34,7 @@ export interface SeekHandler {
   removeURLParameters(url: string): string
 }
 
-export interface BaseLoader {
-  destroy(): void
-  isWorking(): boolean
-  readonly type: string
-  readonly status: number
-  readonly needStashBuffer: boolean
-  onContentLengthKnown: ((contentLength: number) => void) | null
-  onURLRedirect: ((redirectedURL: string) => void) | null
-  onDataArrival: ((chunk: ArrayBuffer, byteStart: number, receivedLength?: number) => void) | null
-  onError: ((errorType: LoaderErrorType, errorInfo: LoaderErrorMessage) => void) | null
-  onComplete: ((rangeFrom: number, rangeTo: number) => void) | null
-  open(dataSource: MediaDataSource | MediaSegment, range: Range): void
-  abort(): void
-}
+export type BaseLoader = import('../io/loader').BaseLoader
 
 export type LoaderStatus = typeof import('../io/loader').LoaderStatus
 export type LoaderErrors = typeof import('../io/loader').LoaderErrors
@@ -61,9 +48,7 @@ export interface LoaderErrorMessage {
 
 export type LoaderErrorInfo = LoaderErrorMessage
 
-export interface BaseLoaderConstructor {
-  new (typeName: string): BaseLoader
-}
+export type BaseLoaderConstructor = typeof import('../io/loader').BaseLoader
 
 export interface CustomSeekHandlerConstructor {
   new (): SeekHandler

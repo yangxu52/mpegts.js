@@ -5,10 +5,10 @@
   "type": "module",
   "main": "./dist/mpegts.cjs",
   "module": "./dist/mpegts.js",
-  "types": "./d.ts/mpegts.d.ts",
+  "types": "./dist/mpegts.d.ts",
   "exports": {
     ".": {
-      "types": "./d.ts/mpegts.d.ts",
+      "types": "./dist/mpegts.d.ts",
       "import": "./dist/mpegts.js",
       "require": "./dist/mpegts.cjs"
     }
